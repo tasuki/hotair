@@ -8,11 +8,15 @@ type Msg
     | Down
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
-    case msg of
-        Up ->
-            { model | balloon = up model.balloon }
+    let
+        new =
+            case msg of
+                Up ->
+                    { model | balloon = up model.balloon }
 
-        Down ->
-            { model | balloon = down model.balloon }
+                Down ->
+                    { model | balloon = down model.balloon }
+    in
+    ( new, Cmd.none )

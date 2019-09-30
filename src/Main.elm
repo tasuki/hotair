@@ -3,20 +3,19 @@ module Main exposing (main)
 import Browser
 import Model exposing (Model, emptyModel)
 import Update exposing (Msg, update)
-import View exposing (view)
+import View
 
 
 main : Program () Model Msg
 main =
-    Browser.sandbox
+    Browser.document
         { init = init
         , update = Update.update
-        , view = View.view
-
-        -- , subscriptions = \_ -> Sub.none
+        , view = \model -> { title = "HotAir", body = [ View.view model ] }
+        , subscriptions = \_ -> Sub.none
         }
 
 
-init : Model
-init =
-    emptyModel
+init : flags -> ( Model, Cmd msg )
+init flags =
+    ( emptyModel, Cmd.none )
