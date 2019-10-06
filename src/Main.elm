@@ -27,17 +27,17 @@ init () =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ onKeyDown (Decode.map key keyCode)
+        [ onKeyDown (Decode.map key (Decode.field "key" Decode.string))
         ]
 
 
-key : Int -> Msg
+key : String -> Msg
 key keycode =
     case keycode of
-        38 ->
+        "ArrowUp" ->
             Up
 
-        40 ->
+        "ArrowDown" ->
             Down
 
         _ ->
