@@ -6,6 +6,7 @@ import Model exposing (Model, down, up)
 type Msg
     = Up
     | Down
+    | Noop
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -18,5 +19,8 @@ update msg model =
 
                 Down ->
                     { model | balloon = down model.balloon }
+
+                Noop ->
+                    model
     in
     ( new, Cmd.none )

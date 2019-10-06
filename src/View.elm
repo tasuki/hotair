@@ -9,7 +9,4 @@ import Update exposing (Msg(..))
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick Up ] [ text "Up" ]
-        , div [] [ text (String.fromInt model.balloon.height) ]
-        , button [ onClick Down ] [ text "Down" ]
-        ]
+        [ text (String.fromInt model.balloon.height) ]
