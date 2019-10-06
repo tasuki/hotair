@@ -1,11 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import Browser.Events exposing (onKeyDown)
-import Html.Events exposing (keyCode)
-import Json.Decode as Decode
-import Model exposing (Model, emptyModel)
-import Update exposing (Msg(..), update)
+import Browser.Events
+import Json.Decode as D
+import Model exposing (Model)
+import Update exposing (Msg(..))
 import View
 
 
@@ -21,13 +20,13 @@ main =
 
 init : () -> ( Model, Cmd msg )
 init () =
-    ( emptyModel, Cmd.none )
+    ( Model.emptyModel, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ onKeyDown (Decode.map key (Decode.field "key" Decode.string))
+        [ Browser.Events.onKeyDown (D.map key (D.field "key" D.string))
         ]
 
 
