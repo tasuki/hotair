@@ -1,4 +1,6 @@
-module Model exposing (Balloon, Model, Position, Wind, down, emptyModel, up)
+module Model exposing (Balloon, Model, Position, Wind, down, emptyModel, heightField, up)
+
+import Random
 
 
 type alias Model =
@@ -40,6 +42,11 @@ emptyModel =
         , vertical = 10
         }
     }
+
+
+heightField : Random.Generator (List Wind)
+heightField =
+    Random.list 20 (Random.map (\d -> Wind d) (Random.int 0 4))
 
 
 up : Balloon -> Balloon

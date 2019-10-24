@@ -1,10 +1,11 @@
 module Update exposing (Msg(..), update)
 
-import Model exposing (Model, down, up)
+import Model exposing (Model, Wind, down, up)
 
 
 type Msg
-    = Up
+    = WindChange (List Wind)
+    | Up
     | Down
     | Noop
 
@@ -14,6 +15,9 @@ update msg model =
     let
         new =
             case msg of
+                WindChange windAtHeight ->
+                    { model | windAtHeight = windAtHeight }
+
                 Up ->
                     { model | balloon = up model.balloon }
 

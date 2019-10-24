@@ -4,6 +4,7 @@ import Browser
 import Browser.Events
 import Json.Decode as D
 import Model exposing (Model)
+import Random
 import Update exposing (Msg(..))
 import View
 
@@ -18,9 +19,13 @@ main =
         }
 
 
-init : () -> ( Model, Cmd msg )
+init : () -> ( Model, Cmd Msg )
 init () =
-    ( Model.emptyModel, Cmd.none )
+    ( Model.emptyModel
+    , Cmd.batch
+        [ Random.generate WindChange Model.heightField
+        ]
+    )
 
 
 subscriptions : Model -> Sub Msg
