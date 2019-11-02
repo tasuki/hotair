@@ -1,6 +1,6 @@
 module Update exposing (Msg(..), update)
 
-import Model exposing (Model, Wind, down, up)
+import Model exposing (Model, Wind, changeHeight)
 
 
 type Msg
@@ -19,10 +19,10 @@ update msg model =
                     { model | windAtHeight = windAtHeight }
 
                 Up ->
-                    { model | balloon = up model.balloon }
+                    { model | balloon = changeHeight model 1 }
 
                 Down ->
-                    { model | balloon = down model.balloon }
+                    { model | balloon = changeHeight model -1 }
 
                 Noop ->
                     model

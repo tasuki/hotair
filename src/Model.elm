@@ -1,4 +1,4 @@
-module Model exposing (Balloon, Model, Position, Wind, down, emptyModel, heightField, up)
+module Model exposing (Balloon, Model, Position, Wind, changeHeight, emptyModel, heightField)
 
 import Random
 
@@ -49,18 +49,26 @@ heightField =
     Random.list 20 (Random.map (\d -> Wind d) (Random.int 0 4))
 
 
-up : Balloon -> Balloon
-up balloon =
-    { balloon | height = balloon.height + 1 }
+changeHeight : Model -> Int -> Balloon
+changeHeight model change =
+    let
+        maxHeight =
+            List.length model.windAtHeight
 
+        balloon =
+            model.balloon
 
-down : Balloon -> Balloon
-down balloon =
+        newHeight =
+            balloon.height + change
+
+        shouldChangeHeight =
+            newHeight >= 0 && newHeight <= maxHeight
+    in
     { balloon
         | height =
-            if balloon.height > 0 then
-                balloon.height - 1
+            if shouldChangeHeight then
+                newHeight
 
             else
-                0
+                balloon.height
     }
