@@ -60,7 +60,14 @@ emptyModel =
 
 heightField : Random.Generator (List Wind)
 heightField =
-    Random.list maxHeight (Random.map (\d -> Wind d) (Random.int 0 3))
+    let
+        windGenerator =
+            Random.map Wind (Random.int 0 3)
+
+        groundWindPrepender =
+            Random.map ((::) (Wind -1))
+    in
+    Random.list maxHeight windGenerator |> groundWindPrepender
 
 
 changeHeight : Model -> Int -> Balloon
