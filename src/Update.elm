@@ -16,7 +16,8 @@ update msg model =
         new =
             case msg of
                 WindChange windAtHeight ->
-                    { model | windAtHeight = windAtHeight }
+                    -- prepend an illegal wind direction - can't move on the ground
+                    { model | windAtHeight = Wind -1 :: windAtHeight }
 
                 Up ->
                     { model | balloon = changeHeight model 1 }

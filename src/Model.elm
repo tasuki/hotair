@@ -1,4 +1,13 @@
-module Model exposing (Balloon, Model, Position, Wind, changeHeight, emptyModel, heightField)
+module Model exposing
+    ( Balloon
+    , Model
+    , Position
+    , Wind
+    , changeHeight
+    , emptyModel
+    , heightField
+    , maxHeight
+    )
 
 import Random
 
@@ -27,6 +36,11 @@ type alias Position =
     }
 
 
+maxHeight : Int
+maxHeight =
+    20
+
+
 emptyModel : Model
 emptyModel =
     { windAtHeight = []
@@ -46,15 +60,12 @@ emptyModel =
 
 heightField : Random.Generator (List Wind)
 heightField =
-    Random.list 20 (Random.map (\d -> Wind d) (Random.int 0 4))
+    Random.list maxHeight (Random.map (\d -> Wind d) (Random.int 0 3))
 
 
 changeHeight : Model -> Int -> Balloon
 changeHeight model change =
     let
-        maxHeight =
-            List.length model.windAtHeight
-
         balloon =
             model.balloon
 
