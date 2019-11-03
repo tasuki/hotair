@@ -24,6 +24,7 @@ init () =
     ( Model.emptyModel
     , Cmd.batch
         [ Random.generate WindChange Model.heightField
+        , Random.generate SetDestination Model.generatePosition
         ]
     )
 

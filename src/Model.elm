@@ -5,7 +5,9 @@ module Model exposing
     , Wind
     , changeHeight
     , emptyModel
+    , generatePosition
     , heightField
+    , mapSize
     , maxHeight
     )
 
@@ -36,6 +38,11 @@ type alias Position =
     }
 
 
+mapSize : Int
+mapSize =
+    30
+
+
 maxHeight : Int
 maxHeight =
     20
@@ -56,6 +63,11 @@ emptyModel =
         , vertical = 10
         }
     }
+
+
+generatePosition : Random.Generator Position
+generatePosition =
+    Random.map2 Position (Random.int 0 mapSize) (Random.int 0 mapSize)
 
 
 heightField : Random.Generator (List Wind)

@@ -9,9 +9,25 @@ import Model exposing (Model)
 import Update exposing (Msg(..))
 
 
-earthPanel : Model.Balloon -> Element msg
-earthPanel balloon =
-    column [ height fill, width fill ] [ text (String.fromInt balloon.height) ]
+earthPanel : Model -> Element msg
+earthPanel model =
+    let
+        cell =
+            row [ height (fillPortion 1), width (fillPortion 1) ] [ text "." ]
+    in
+    column [ height fill, width fill ]
+        (List.repeat Model.mapSize
+            (row [ height fill, width fill ]
+                (List.repeat Model.mapSize cell)
+            )
+        )
+
+
+
+-- [ text (String.fromInt model.balloon.height)
+-- , text (String.fromInt model.destination.horizontal)
+-- , text (String.fromInt model.destination.vertical)
+-- ]
 
 
 displayDirection : Int -> String
@@ -76,4 +92,4 @@ view : Model -> Html Msg
 view model =
     layout [ Font.color base3, Background.color base03 ] <|
         row [ height fill, width fill ]
-            [ earthPanel model.balloon, windsPanel model ]
+            [ earthPanel model, windsPanel model ]
