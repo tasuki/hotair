@@ -1,33 +1,41 @@
 module View exposing (view)
 
+import Array
 import Colors exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
+import Grid
 import Html exposing (Html)
 import Model exposing (Model)
 import Update exposing (Msg(..))
 
 
+cell : String -> Element msg
+cell str =
+    row [ height (fillPortion 1), width (fillPortion 1) ]
+        [ Element.el [ centerX, centerY ] (text str) ]
+
+
+showRow : Array.Array String -> Element msg
+showRow r =
+    row [ height fill, width fill ]
+        (Array.toList r |> List.map cell)
+
+
 earthPanel : Model -> Element msg
 earthPanel model =
     let
-        cell =
-            row [ height (fillPortion 1), width (fillPortion 1) ] [ text "." ]
+        grid : Grid.Grid String
+        grid =
+            Grid.repeat Model.mapSize Model.mapSize "."
+                |> Grid.set (Model.toCoordinates model.destination) "x"
+                |> Grid.set (Model.toCoordinates model.balloon.position) "o"
     in
-    column [ height fill, width fill ]
-        (List.repeat Model.mapSize
-            (row [ height fill, width fill ]
-                (List.repeat Model.mapSize cell)
-            )
-        )
-
-
-
--- [ text (String.fromInt model.balloon.height)
--- , text (String.fromInt model.destination.horizontal)
--- , text (String.fromInt model.destination.vertical)
--- ]
+    Grid.rows grid
+        |> Array.map showRow
+        |> Array.toList
+        |> column [ height fill, width fill ]
 
 
 displayDirection : Int -> String
@@ -63,7 +71,7 @@ balloonHeight balloon =
         |> List.map
             (\h ->
                 if h == balloon.height then
-                    "x"
+                    "o"
 
                 else
                     " "

@@ -9,6 +9,7 @@ module Model exposing
     , heightField
     , mapSize
     , maxHeight
+    , toCoordinates
     )
 
 import Random
@@ -63,6 +64,11 @@ emptyModel =
         , vertical = 10
         }
     }
+
+
+toCoordinates : Position -> ( Int, Int )
+toCoordinates position =
+    ( position.horizontal, position.vertical )
 
 
 generatePosition : Random.Generator Position
