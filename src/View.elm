@@ -38,22 +38,22 @@ earthPanel model =
         |> column [ height fill, width fill ]
 
 
-displayDirection : Int -> String
+displayDirection : Model.Wind -> String
 displayDirection direction =
     case direction of
-        0 ->
+        Model.N _ ->
             "^"
 
-        1 ->
-            ">"
-
-        2 ->
+        Model.S _ ->
             "v"
 
-        3 ->
+        Model.E _ ->
+            ">"
+
+        Model.W _ ->
             "<"
 
-        _ ->
+        Model.Calm ->
             " "
 
 
@@ -61,7 +61,7 @@ windList : List Model.Wind -> List (Element msg)
 windList windAtHeight =
     windAtHeight
         |> List.reverse
-        |> List.map (\w -> el [ alignRight ] (text <| displayDirection w.direction))
+        |> List.map (\w -> el [ alignRight ] (text <| displayDirection w))
 
 
 balloonHeight : Model.Balloon -> List (Element msg)

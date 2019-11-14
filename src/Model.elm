@@ -2,7 +2,7 @@ module Model exposing
     ( Balloon
     , Model
     , Position
-    , Wind
+    , Wind(..)
     , blow
     , changeHeight
     , emptyModel
@@ -23,9 +23,12 @@ type alias Model =
     }
 
 
-type alias Wind =
-    { direction : Int
-    }
+type Wind
+    = Calm
+    | N Int
+    | S Int
+    | E Int
+    | W Int
 
 
 type alias Balloon =
@@ -84,11 +87,13 @@ generatePosition =
 heightField : Random.Generator (List Wind)
 heightField =
     let
+        windGenerator : Random.Generator Wind
         windGenerator =
-            Random.map Wind (Random.int 0 3)
+            Random.uniform N [ S, E, W ]
+                |> Random.map ((|>) 1)
 
         groundWindPrepender =
-            Random.map ((::) (Wind -1))
+            Random.map ((::) Calm)
     in
     Random.list maxHeight windGenerator |> groundWindPrepender
 
@@ -107,20 +112,20 @@ blow model =
 
 changePosition : Position -> Wind -> Position
 changePosition position wind =
-    case wind.direction of
-        0 ->
+    case wind of
+        N _ ->
             { position | vertical = modBy mapSize (position.vertical - 1) }
 
-        1 ->
-            { position | horizontal = modBy mapSize (position.horizontal + 1) }
-
-        2 ->
+        S _ ->
             { position | vertical = modBy mapSize (position.vertical + 1) }
 
-        3 ->
+        E _ ->
+            { position | horizontal = modBy mapSize (position.horizontal + 1) }
+
+        W _ ->
             { position | horizontal = modBy mapSize (position.horizontal - 1) }
 
-        _ ->
+        Calm ->
             position
 
 
@@ -129,7 +134,7 @@ windAtHeight winds height =
     winds
         |> List.drop height
         |> List.head
-        |> Maybe.withDefault (Wind -1)
+        |> Maybe.withDefault Calm
 
 
 changeHeight : Model -> Int -> Balloon
