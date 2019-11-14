@@ -1,10 +1,12 @@
 module Update exposing (Msg(..), update)
 
-import Model exposing (Model, Position, Wind, changeHeight)
+import Model exposing (Model, Position, Wind, blow, changeHeight)
+import Time
 
 
 type Msg
-    = SetDestination Position
+    = Tick Time.Posix
+    | SetDestination Position
     | WindChange (List Wind)
     | Up
     | Down
@@ -16,6 +18,9 @@ update msg model =
     let
         new =
             case msg of
+                Tick _ ->
+                    { model | balloon = blow model }
+
                 SetDestination position ->
                     { model | destination = position }
 

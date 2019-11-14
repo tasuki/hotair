@@ -5,6 +5,7 @@ import Browser.Events
 import Json.Decode as D
 import Model exposing (Model)
 import Random
+import Time
 import Update exposing (Msg(..))
 import View
 
@@ -33,6 +34,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Browser.Events.onKeyDown (D.map key (D.field "key" D.string))
+        , Time.every 1000 Tick
         ]
 
 
