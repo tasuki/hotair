@@ -46,12 +46,12 @@ type alias Position =
 
 mapSize : Int
 mapSize =
-    10
+    12
 
 
 maxHeight : Int
 maxHeight =
-    20
+    10
 
 
 emptyModel : Model
@@ -115,20 +115,42 @@ blow model =
     }
 
 
+updatePositionNoWrap : Int -> Int -> Int
+updatePositionNoWrap position move =
+    let
+        newPosition =
+            position + move
+    in
+    if newPosition >= 0 && newPosition < mapSize then
+        newPosition
+
+    else
+        position
+
+
+updatePositionWrap : Int -> Int -> Int
+updatePositionWrap position move =
+    modBy mapSize (position + move)
+
+
 changePosition : Position -> Wind -> Position
 changePosition position wind =
+    let
+        updateFunction =
+            updatePositionNoWrap
+    in
     case wind of
         N _ ->
-            { position | vertical = modBy mapSize (position.vertical - 1) }
+            { position | vertical = updateFunction position.vertical -1 }
 
         S _ ->
-            { position | vertical = modBy mapSize (position.vertical + 1) }
+            { position | vertical = updateFunction position.vertical 1 }
 
         E _ ->
-            { position | horizontal = modBy mapSize (position.horizontal + 1) }
+            { position | horizontal = updateFunction position.horizontal 1 }
 
         W _ ->
-            { position | horizontal = modBy mapSize (position.horizontal - 1) }
+            { position | horizontal = updateFunction position.horizontal -1 }
 
         Calm ->
             position

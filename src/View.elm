@@ -11,6 +11,14 @@ import Model exposing (Model)
 import Update exposing (Msg(..))
 
 
+sidebarWidth =
+    90
+
+
+mapSize =
+    400
+
+
 cell : String -> Element msg
 cell str =
     row [ height (fillPortion 1), width (fillPortion 1) ]
@@ -84,13 +92,13 @@ windsPanel model =
     let
         windsPanelProperties =
             [ height fill
-            , width <| shrink
-            , Background.color base0
+            , width fill
+            , Background.color base01
             , padding 20
             , spaceEvenly
             ]
     in
-    row [ height fill ]
+    row [ height fill, width <| px sidebarWidth ]
         [ column windsPanelProperties (balloonHeight model.balloon)
         , column windsPanelProperties (windList model.windAtHeight)
         ]
@@ -99,5 +107,5 @@ windsPanel model =
 view : Model -> Html Msg
 view model =
     layout [ Font.color base3, Background.color base03 ] <|
-        row [ height fill, width fill ]
+        row [ Background.color base02, height <| px mapSize, width <| px (mapSize + sidebarWidth), centerX, centerY ]
             [ earthPanel model, windsPanel model ]
