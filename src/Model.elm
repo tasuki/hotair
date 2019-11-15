@@ -34,6 +34,7 @@ type Wind
 type alias Balloon =
     { position : Position
     , height : Int
+    , changedHeight : Bool
     }
 
 
@@ -62,6 +63,7 @@ emptyModel =
             , vertical = 0
             }
         , height = 0
+        , changedHeight = False
         }
     , destination =
         { horizontal = 10
@@ -107,7 +109,10 @@ blow model =
         wind =
             windAtHeight model.windAtHeight model.balloon.height
     in
-    { balloon | position = changePosition balloon.position wind }
+    { balloon
+        | position = changePosition balloon.position wind
+        , changedHeight = False
+    }
 
 
 changePosition : Position -> Wind -> Position
@@ -147,7 +152,7 @@ changeHeight model change =
             balloon.height + change
 
         shouldChangeHeight =
-            newHeight >= 0 && newHeight <= maxHeight
+            balloon.changedHeight == False && newHeight >= 0 && newHeight <= maxHeight
     in
     { balloon
         | height =
@@ -156,4 +161,5 @@ changeHeight model change =
 
             else
                 balloon.height
+        , changedHeight = True
     }
