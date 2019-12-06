@@ -10,6 +10,7 @@ module Model exposing
     , heightField
     , mapSize
     , maxHeight
+    , progressbarSize
     , toCoordinates
     )
 
@@ -20,6 +21,7 @@ type alias Model =
     { windAtHeight : List Wind
     , balloon : Balloon
     , destination : Position
+    , microTime : Int
     }
 
 
@@ -54,6 +56,11 @@ maxHeight =
     10
 
 
+progressbarSize : Int
+progressbarSize =
+    10
+
+
 emptyModel : Model
 emptyModel =
     { windAtHeight = []
@@ -69,6 +76,7 @@ emptyModel =
         { horizontal = 10
         , vertical = 10
         }
+    , microTime = 0
     }
 
 

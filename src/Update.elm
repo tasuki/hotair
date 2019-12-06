@@ -6,6 +6,7 @@ import Time
 
 type Msg
     = Tick Time.Posix
+    | MicroTick Time.Posix
     | SetDestination Position
     | WindChange (List Wind)
     | Up
@@ -19,7 +20,10 @@ update msg model =
         new =
             case msg of
                 Tick _ ->
-                    { model | balloon = blow model }
+                    { model | balloon = blow model, microTime = 0 }
+
+                MicroTick _ ->
+                    { model | microTime = model.microTime + 1 }
 
                 SetDestination position ->
                     { model | destination = position }

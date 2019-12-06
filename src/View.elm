@@ -12,7 +12,11 @@ import Update exposing (Msg(..))
 
 
 sidebarWidth =
-    90
+    110
+
+
+topbarHeight =
+    10
 
 
 mapSize =
@@ -104,8 +108,29 @@ windsPanel model =
         ]
 
 
+progressBar : Model -> Element msg
+progressBar model =
+    let
+        bar =
+            List.range 1 (Model.progressbarSize + 1)
+                |> List.map
+                    (\i ->
+                        if i <= model.microTime then
+                            "x"
+
+                        else
+                            " "
+                    )
+                |> List.map (\i -> el [ width fill ] (text i))
+    in
+    row [ width fill ] bar
+
+
 view : Model -> Html Msg
 view model =
     layout [ Font.color base3, Background.color base03 ] <|
-        row [ Background.color base02, height <| px mapSize, width <| px (mapSize + sidebarWidth), centerX, centerY ]
-            [ earthPanel model, windsPanel model ]
+        column [ Background.color base02, height <| px (mapSize + topbarHeight), centerX, centerY ]
+            [ row [ width fill ] [ el [ width fill ] (progressBar model) ]
+            , row [ Background.color base02, height <| px mapSize, width <| px (mapSize + sidebarWidth), centerX, centerY ]
+                [ earthPanel model, windsPanel model ]
+            ]
