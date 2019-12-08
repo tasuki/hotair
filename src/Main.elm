@@ -34,7 +34,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Browser.Events.onKeyDown (D.map key (D.field "key" D.string))
-        , Time.every 1000 Tick
+        , Time.every 300 Tick
         ]
 
 

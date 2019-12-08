@@ -84,7 +84,7 @@ balloonHeight balloon =
                 else
                     " "
             )
-        |> List.map (\t -> text t)
+        |> List.map text
 
 
 windsPanel : Model -> Element msg
