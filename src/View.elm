@@ -2,6 +2,7 @@ module View exposing (view)
 
 import Array
 import Colors exposing (..)
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
@@ -34,10 +35,25 @@ showRow r =
 earthPanel : Model -> Element msg
 earthPanel model =
     let
+        displayTreasures : Int -> Int -> String -> String
+        displayTreasures x y e =
+            case model.treasures |> Dict.get ( x, y ) of
+                Nothing ->
+                    "."
+
+                Just Model.Bronze ->
+                    "1"
+
+                Just Model.Silver ->
+                    "2"
+
+                Just Model.Gold ->
+                    "3"
+
         grid : Grid.Grid String
         grid =
             Grid.repeat Model.mapSize Model.mapSize "."
-                |> Grid.set (Model.toCoordinates model.destination) "x"
+                |> Grid.indexedMap displayTreasures
                 |> Grid.set (Model.toCoordinates model.balloon.position) "o"
     in
     Grid.rows grid

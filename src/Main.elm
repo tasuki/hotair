@@ -5,6 +5,7 @@ import Browser.Events
 import Json.Decode as D
 import Model exposing (Model)
 import Random
+import Random.List
 import Time
 import Update exposing (Msg(..))
 import View
@@ -25,7 +26,7 @@ init () =
     ( Model.emptyModel
     , Cmd.batch
         [ Random.generate WindChange Model.heightField
-        , Random.generate SetDestination Model.generatePosition
+        , Random.generate AssumePositions (Random.List.shuffle Model.allPositions)
         ]
     )
 

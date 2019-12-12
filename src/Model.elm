@@ -2,24 +2,30 @@ module Model exposing
     ( Balloon
     , Model
     , Position
+    , Treasure(..)
+    , Treasures
     , Wind(..)
+    , allPositions
     , blow
     , changeHeight
     , emptyModel
-    , generatePosition
+    , generateTreasures
+    , getPosition
     , heightField
     , mapSize
     , maxHeight
+    , setBalloonPosition
     , toCoordinates
     )
 
+import Dict exposing (Dict)
 import Random
 
 
 type alias Model =
     { windAtHeight : List Wind
     , balloon : Balloon
-    , destination : Position
+    , treasures : Treasures
     }
 
 
@@ -38,6 +44,17 @@ type alias Balloon =
     }
 
 
+type alias Treasures =
+    -- Should be `Dict Position Treasure`. Records aren't comparable. Tuples are. Go figure.
+    Dict ( Int, Int ) Treasure
+
+
+type Treasure
+    = Bronze
+    | Silver
+    | Gold
+
+
 type alias Position =
     { horizontal : Int
     , vertical : Int
@@ -54,6 +71,21 @@ maxHeight =
     10
 
 
+availableTreasures : List Treasure
+availableTreasures =
+    [ Gold, Gold, Gold, Silver, Silver, Silver, Bronze, Bronze, Bronze ]
+
+
+generateTreasures : List Position -> Treasures
+generateTreasures positions =
+    let
+        zipped : List ( ( Int, Int ), Treasure )
+        zipped =
+            List.map2 Tuple.pair (positions |> List.map toCoordinates) availableTreasures
+    in
+    Dict.fromList zipped
+
+
 emptyModel : Model
 emptyModel =
     { windAtHeight = []
@@ -65,10 +97,7 @@ emptyModel =
         , height = 0
         , changedHeight = False
         }
-    , destination =
-        { horizontal = 10
-        , vertical = 10
-        }
+    , treasures = Dict.empty
     }
 
 
@@ -77,13 +106,22 @@ toCoordinates position =
     ( position.horizontal, position.vertical )
 
 
-generatePosition : Random.Generator Position
-generatePosition =
+getPosition : Maybe Position -> Position
+getPosition position =
+    Maybe.withDefault (Position 0 0) position
+
+
+allPositions : List Position
+allPositions =
     let
-        rnd =
-            Random.int 0 (mapSize - 1)
+        coordsList =
+            List.range 0 (mapSize - 1)
+
+        createPositionRow : Int -> List Position
+        createPositionRow row =
+            coordsList |> List.map (Position row)
     in
-    Random.map2 Position rnd rnd
+    coordsList |> List.concatMap createPositionRow
 
 
 heightField : Random.Generator (List Wind)
@@ -100,19 +138,21 @@ heightField =
     Random.list maxHeight windGenerator |> groundWindPrepender
 
 
-blow : Model -> Balloon
+setBalloonPosition : Balloon -> Position -> Balloon
+setBalloonPosition balloon position =
+    { balloon | position = position, changedHeight = False }
+
+
+blow : Model -> Model
 blow model =
     let
-        balloon =
-            model.balloon
-
         wind =
             windAtHeight model.windAtHeight model.balloon.height
+
+        position =
+            changePosition model.balloon.position wind
     in
-    { balloon
-        | position = changePosition balloon.position wind
-        , changedHeight = False
-    }
+    { model | balloon = setBalloonPosition model.balloon position }
 
 
 updatePositionNoWrap : Int -> Int -> Int

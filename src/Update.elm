@@ -1,12 +1,12 @@
 module Update exposing (Msg(..), update)
 
-import Model exposing (Model, Position, Wind, blow, changeHeight)
+import Model exposing (Model, Position, Treasures, Wind, blow, changeHeight, setBalloonPosition)
 import Time
 
 
 type Msg
     = Tick Time.Posix
-    | SetDestination Position
+    | AssumePositions (List Position)
     | WindChange (List Wind)
     | Up
     | Down
@@ -19,10 +19,19 @@ update msg model =
         new =
             case msg of
                 Tick _ ->
-                    { model | balloon = blow model }
+                    blow model
 
-                SetDestination position ->
-                    { model | destination = position }
+                AssumePositions positions ->
+                    let
+                        balloonPosition : Position
+                        balloonPosition =
+                            List.head positions |> Model.getPosition
+
+                        treasures : Treasures
+                        treasures =
+                            List.drop 1 positions |> Model.generateTreasures
+                    in
+                    { model | balloon = setBalloonPosition model.balloon balloonPosition, treasures = treasures }
 
                 WindChange windAtHeight ->
                     { model | windAtHeight = windAtHeight }
