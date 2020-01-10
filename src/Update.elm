@@ -1,6 +1,6 @@
 module Update exposing (Msg(..), update)
 
-import Model exposing (Model, Position, Treasures, Wind, blow, changeHeight, setBalloonPosition)
+import Model exposing (Balloon, Model, Player, Position, Treasures, Wind, blow, changeHeight, setBalloonPosition)
 import Time
 
 
@@ -23,24 +23,32 @@ update msg model =
 
                 AssumePositions positions ->
                     let
-                        balloonPosition : Position
-                        balloonPosition =
+                        startingPosition : Position
+                        startingPosition =
                             List.head positions |> Model.getPosition
+
+                        assumePosition : Player -> Player
+                        assumePosition plr =
+                            { plr | balloon = setBalloonPosition startingPosition plr.balloon }
+
+                        players : List Player
+                        players =
+                            model.players |> List.map assumePosition
 
                         treasures : Treasures
                         treasures =
                             List.drop 1 positions |> Model.generateTreasures
                     in
-                    { model | balloon = setBalloonPosition model.balloon balloonPosition, treasures = treasures }
+                    { model | players = players, treasures = treasures }
 
                 WindChange windAtHeight ->
                     { model | windAtHeight = windAtHeight }
 
                 Up ->
-                    { model | balloon = changeHeight model 1 }
+                    changeHeight model 1
 
                 Down ->
-                    { model | balloon = changeHeight model -1 }
+                    changeHeight model -1
 
                 Noop ->
                     model

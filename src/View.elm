@@ -20,6 +20,10 @@ mapSize =
     400
 
 
+type alias Board =
+    Grid.Grid String
+
+
 cell : String -> Element msg
 cell str =
     row [ height (fillPortion 1), width (fillPortion 1) ]
@@ -50,11 +54,19 @@ earthPanel model =
                 Just Model.Gold ->
                     "3"
 
-        grid : Grid.Grid String
+        setPosition : Model.Balloon -> Board -> Board
+        setPosition balloon board =
+            Grid.set (Model.toCoordinates balloon.position) "o" board
+
+        displayBalloons : List Model.Balloon -> Board -> Board
+        displayBalloons balloons board =
+            List.foldl setPosition board balloons
+
+        grid : Board
         grid =
             Grid.repeat Model.mapSize Model.mapSize "."
                 |> Grid.indexedMap displayTreasures
-                |> Grid.set (Model.toCoordinates model.balloon.position) "o"
+                |> displayBalloons (model.players |> List.map (\p -> p.balloon))
     in
     Grid.rows grid
         |> Array.map showRow
@@ -88,13 +100,13 @@ windList windAtHeight =
         |> List.map (\w -> el [ alignRight ] (text <| displayDirection w))
 
 
-balloonHeight : Model.Balloon -> List (Element msg)
-balloonHeight balloon =
+balloonHeight : Model.Player -> List (Element msg)
+balloonHeight player =
     List.range 0 Model.maxHeight
         |> List.reverse
         |> List.map
             (\h ->
-                if h == balloon.height then
+                if h == player.balloon.height then
                     "o"
 
                 else
@@ -113,11 +125,19 @@ windsPanel model =
             , padding 20
             , spaceEvenly
             ]
+
+        players : List (Element msg)
+        players =
+            model.players
+                |> List.map balloonHeight
+                |> List.map (column windsPanelProperties)
+
+        legend : Element msg
+        legend =
+            column windsPanelProperties (windList model.windAtHeight)
     in
     row [ height fill, width <| px sidebarWidth ]
-        [ column windsPanelProperties (balloonHeight model.balloon)
-        , column windsPanelProperties (windList model.windAtHeight)
-        ]
+        (List.append players [ legend ])
 
 
 view : Model -> Html Msg

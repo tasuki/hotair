@@ -1,6 +1,7 @@
 module Model exposing
     ( Balloon
     , Model
+    , Player
     , Position
     , Treasure(..)
     , Treasures
@@ -18,13 +19,15 @@ module Model exposing
     , toCoordinates
     )
 
+import Colors
 import Dict exposing (Dict)
+import Element
 import Random
 
 
 type alias Model =
     { windAtHeight : List Wind
-    , balloon : Balloon
+    , players : List Player
     , treasures : Treasures
     }
 
@@ -37,8 +40,15 @@ type Wind
     | W Int
 
 
+type alias Player =
+    { balloon : Balloon
+    , collected : Int
+    }
+
+
 type alias Balloon =
-    { position : Position
+    { color : Element.Color
+    , position : Position
     , height : Int
     , changedHeight : Bool
     }
@@ -86,17 +96,28 @@ generateTreasures positions =
     Dict.fromList zipped
 
 
-emptyModel : Model
-emptyModel =
-    { windAtHeight = []
-    , balloon =
-        { position =
+createPlayer : Element.Color -> Player
+createPlayer col =
+    { balloon =
+        { color = col
+        , position =
             { horizontal = 0
             , vertical = 0
             }
         , height = 0
         , changedHeight = False
         }
+    , collected = 0
+    }
+
+
+emptyModel : Model
+emptyModel =
+    { windAtHeight = []
+    , players =
+        [ createPlayer Colors.magenta
+        , createPlayer Colors.cyan
+        ]
     , treasures = Dict.empty
     }
 
@@ -138,21 +159,26 @@ heightField =
     Random.list maxHeight windGenerator |> groundWindPrepender
 
 
-setBalloonPosition : Balloon -> Position -> Balloon
-setBalloonPosition balloon position =
+setBalloonPosition : Position -> Balloon -> Balloon
+setBalloonPosition position balloon =
     { balloon | position = position, changedHeight = False }
+
+
+blowPlayer : List Wind -> Player -> Player
+blowPlayer winds player =
+    let
+        playerWind =
+            windAtHeight winds player.balloon.height
+
+        position =
+            changePosition player.balloon.position playerWind
+    in
+    { player | balloon = setBalloonPosition position player.balloon }
 
 
 blow : Model -> Model
 blow model =
-    let
-        wind =
-            windAtHeight model.windAtHeight model.balloon.height
-
-        position =
-            changePosition model.balloon.position wind
-    in
-    { model | balloon = setBalloonPosition model.balloon position }
+    { model | players = model.players |> List.map (blowPlayer model.windAtHeight) }
 
 
 updatePositionNoWrap : Int -> Int -> Int
@@ -204,12 +230,9 @@ windAtHeight winds height =
         |> Maybe.withDefault Calm
 
 
-changeHeight : Model -> Int -> Balloon
-changeHeight model change =
+changeBalloonHeight : Balloon -> Int -> Balloon
+changeBalloonHeight balloon change =
     let
-        balloon =
-            model.balloon
-
         newHeight =
             balloon.height + change
 
@@ -225,3 +248,13 @@ changeHeight model change =
                 balloon.height
         , changedHeight = True
     }
+
+
+changeHeight : Model -> Int -> Model
+changeHeight model change =
+    let
+        changePlayerHeight : Player -> Player
+        changePlayerHeight player =
+            { player | balloon = changeBalloonHeight player.balloon change }
+    in
+    { model | players = model.players |> List.map changePlayerHeight }
