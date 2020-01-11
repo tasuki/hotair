@@ -1,5 +1,6 @@
 module Update exposing (Msg(..), update)
 
+import Dict exposing (Dict)
 import Model exposing (Balloon, Model, Player, Position, Treasures, Wind, blow, changeHeight, setBalloonPosition)
 import Time
 
@@ -27,13 +28,13 @@ update msg model =
                         startingPosition =
                             List.head positions |> Model.getPosition
 
-                        assumePosition : Player -> Player
-                        assumePosition plr =
+                        assumePosition : String -> Player -> Player
+                        assumePosition id plr =
                             { plr | balloon = setBalloonPosition startingPosition plr.balloon }
 
-                        players : List Player
+                        players : Dict String Player
                         players =
-                            model.players |> List.map assumePosition
+                            model.players |> Dict.map assumePosition
 
                         treasures : Treasures
                         treasures =
@@ -45,10 +46,10 @@ update msg model =
                     { model | windAtHeight = windAtHeight }
 
                 Up ->
-                    changeHeight model 1
+                    changeHeight model "cyan" 1
 
                 Down ->
-                    changeHeight model -1
+                    changeHeight model "cyan" -1
 
                 Noop ->
                     model

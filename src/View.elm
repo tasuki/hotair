@@ -66,7 +66,7 @@ earthPanel model =
         grid =
             Grid.repeat Model.mapSize Model.mapSize "."
                 |> Grid.indexedMap displayTreasures
-                |> displayBalloons (model.players |> List.map (\p -> p.balloon))
+                |> displayBalloons (model.players |> Dict.values |> List.map (\p -> p.balloon))
     in
     Grid.rows grid
         |> Array.map showRow
@@ -129,6 +129,7 @@ windsPanel model =
         players : List (Element msg)
         players =
             model.players
+                |> Dict.values
                 |> List.map balloonHeight
                 |> List.map (column windsPanelProperties)
 

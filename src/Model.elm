@@ -27,7 +27,7 @@ import Random
 
 type alias Model =
     { windAtHeight : List Wind
-    , players : List Player
+    , players : Dict String Player
     , treasures : Treasures
     }
 
@@ -115,9 +115,10 @@ emptyModel : Model
 emptyModel =
     { windAtHeight = []
     , players =
-        [ createPlayer Colors.magenta
-        , createPlayer Colors.cyan
-        ]
+        Dict.fromList
+            [ ( "magenta", createPlayer Colors.magenta )
+            , ( "cyan", createPlayer Colors.cyan )
+            ]
     , treasures = Dict.empty
     }
 
@@ -164,8 +165,8 @@ setBalloonPosition position balloon =
     { balloon | position = position, changedHeight = False }
 
 
-blowPlayer : List Wind -> Player -> Player
-blowPlayer winds player =
+blowPlayer : List Wind -> String -> Player -> Player
+blowPlayer winds id player =
     let
         playerWind =
             windAtHeight winds player.balloon.height
@@ -178,7 +179,7 @@ blowPlayer winds player =
 
 blow : Model -> Model
 blow model =
-    { model | players = model.players |> List.map (blowPlayer model.windAtHeight) }
+    { model | players = model.players |> Dict.map (blowPlayer model.windAtHeight) }
 
 
 updatePositionNoWrap : Int -> Int -> Int
@@ -250,11 +251,11 @@ changeBalloonHeight balloon change =
     }
 
 
-changeHeight : Model -> Int -> Model
-changeHeight model change =
+changeHeight : Model -> String -> Int -> Model
+changeHeight model id change =
     let
         changePlayerHeight : Player -> Player
-        changePlayerHeight player =
-            { player | balloon = changeBalloonHeight player.balloon change }
+        changePlayerHeight pl =
+            { pl | balloon = changeBalloonHeight pl.balloon change }
     in
-    { model | players = model.players |> List.map changePlayerHeight }
+    { model | players = Dict.update id (Maybe.map changePlayerHeight) model.players }
