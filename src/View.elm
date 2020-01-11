@@ -54,19 +54,19 @@ earthPanel model =
                 Just Model.Gold ->
                     "3"
 
-        setPosition : Model.Balloon -> Board -> Board
-        setPosition balloon board =
-            Grid.set (Model.toCoordinates balloon.position) "o" board
+        setPosition : Model.Player -> Board -> Board
+        setPosition player board =
+            Grid.set (Model.toCoordinates player.balloon.position) "o" board
 
-        displayBalloons : List Model.Balloon -> Board -> Board
-        displayBalloons balloons board =
-            List.foldl setPosition board balloons
+        displayBalloons : List Model.Player -> Board -> Board
+        displayBalloons players board =
+            List.foldl setPosition board players
 
         grid : Board
         grid =
             Grid.repeat Model.mapSize Model.mapSize "."
                 |> Grid.indexedMap displayTreasures
-                |> displayBalloons (model.players |> Dict.values |> List.map (\p -> p.balloon))
+                |> displayBalloons (model.players |> Dict.values)
     in
     Grid.rows grid
         |> Array.map showRow
@@ -100,6 +100,11 @@ windList windAtHeight =
         |> List.map (\w -> el [ alignRight ] (text <| displayDirection w))
 
 
+displayBalloon : Model.Player -> Element msg
+displayBalloon player =
+    Element.el [ Font.color player.balloon.color ] (text "o")
+
+
 balloonHeight : Model.Player -> List (Element msg)
 balloonHeight player =
     List.range 0 Model.maxHeight
@@ -107,12 +112,11 @@ balloonHeight player =
         |> List.map
             (\h ->
                 if h == player.balloon.height then
-                    "o"
+                    displayBalloon player
 
                 else
-                    " "
+                    text " "
             )
-        |> List.map text
 
 
 windsPanel : Model -> Element msg
@@ -121,7 +125,7 @@ windsPanel model =
         windsPanelProperties =
             [ height fill
             , width fill
-            , Background.color base01
+            , Background.color base02
             , padding 20
             , spaceEvenly
             ]
@@ -143,6 +147,6 @@ windsPanel model =
 
 view : Model -> Html Msg
 view model =
-    layout [ Font.color base3, Background.color base03 ] <|
-        row [ Background.color base02, height <| px mapSize, width <| px (mapSize + sidebarWidth), centerX, centerY ]
+    layout [ Font.color base3, Background.color base02 ] <|
+        row [ Background.color base03, height <| px mapSize, width <| px (mapSize + sidebarWidth), centerX, centerY ]
             [ earthPanel model, windsPanel model ]
