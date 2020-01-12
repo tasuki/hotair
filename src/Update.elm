@@ -9,8 +9,8 @@ type Msg
     = Tick Time.Posix
     | AssumePositions (List Position)
     | WindChange (List Wind)
-    | Up
-    | Down
+    | Up String
+    | Down String
     | Noop
 
 
@@ -45,11 +45,11 @@ update msg model =
                 WindChange windAtHeight ->
                     { model | windAtHeight = windAtHeight }
 
-                Up ->
-                    changeHeight model "cyan" 1
+                Up player ->
+                    changeHeight model player 1
 
-                Down ->
-                    changeHeight model "cyan" -1
+                Down player ->
+                    changeHeight model player -1
 
                 Noop ->
                     model

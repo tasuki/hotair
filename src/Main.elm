@@ -42,11 +42,17 @@ subscriptions model =
 key : String -> Msg
 key keycode =
     case keycode of
+        "a" ->
+            Up "player1"
+
+        "z" ->
+            Down "player1"
+
         "ArrowUp" ->
-            Up
+            Up "player2"
 
         "ArrowDown" ->
-            Down
+            Down "player2"
 
         _ ->
             Noop

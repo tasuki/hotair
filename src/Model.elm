@@ -41,7 +41,8 @@ type Wind
 
 
 type alias Player =
-    { balloon : Balloon
+    { name : String
+    , balloon : Balloon
     , collected : Int
     }
 
@@ -96,9 +97,10 @@ generateTreasures positions =
     Dict.fromList zipped
 
 
-createPlayer : Element.Color -> Player
-createPlayer col =
-    { balloon =
+createPlayer : String -> Element.Color -> Player
+createPlayer name col =
+    { name = name
+    , balloon =
         { color = col
         , position =
             { horizontal = 0
@@ -116,8 +118,8 @@ emptyModel =
     { windAtHeight = []
     , players =
         Dict.fromList
-            [ ( "magenta", createPlayer Colors.magenta )
-            , ( "cyan", createPlayer Colors.cyan )
+            [ ( "player1", createPlayer "player1" Colors.cyan )
+            , ( "player2", createPlayer "player2" Colors.blue )
             ]
     , treasures = Dict.empty
     }

@@ -20,17 +20,17 @@ mapSize =
     400
 
 
-type alias Board =
-    Grid.Grid String
+type alias Board msg =
+    Grid.Grid (Element msg)
 
 
-cell : String -> Element msg
-cell str =
+cell : Element msg -> Element msg
+cell e =
     row [ height (fillPortion 1), width (fillPortion 1) ]
-        [ Element.el [ centerX, centerY ] (text str) ]
+        [ Element.el [ centerX, centerY ] e ]
 
 
-showRow : Array.Array String -> Element msg
+showRow : Array.Array (Element msg) -> Element msg
 showRow r =
     row [ height fill, width fill ]
         (Array.toList r |> List.map cell)
@@ -39,30 +39,30 @@ showRow r =
 earthPanel : Model -> Element msg
 earthPanel model =
     let
-        displayTreasures : Int -> Int -> String -> String
+        displayTreasures : Int -> Int -> String -> Element msg
         displayTreasures x y e =
             case model.treasures |> Dict.get ( x, y ) of
                 Nothing ->
-                    "."
+                    Element.el [ Font.color Colors.base00 ] (text ".")
 
                 Just Model.Bronze ->
-                    "1"
+                    Element.el [ Font.color Colors.red ] (text "1")
 
                 Just Model.Silver ->
-                    "2"
+                    Element.el [ Font.color Colors.orange ] (text "2")
 
                 Just Model.Gold ->
-                    "3"
+                    Element.el [ Font.color Colors.yellow ] (text "3")
 
-        setPosition : Model.Player -> Board -> Board
+        setPosition : Model.Player -> Board msg -> Board msg
         setPosition player board =
-            Grid.set (Model.toCoordinates player.balloon.position) "o" board
+            Grid.set (Model.toCoordinates player.balloon.position) (displayBalloon player) board
 
-        displayBalloons : List Model.Player -> Board -> Board
+        displayBalloons : List Model.Player -> Board msg -> Board msg
         displayBalloons players board =
             List.foldl setPosition board players
 
-        grid : Board
+        grid : Board msg
         grid =
             Grid.repeat Model.mapSize Model.mapSize "."
                 |> Grid.indexedMap displayTreasures
