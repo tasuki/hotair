@@ -43,7 +43,7 @@ type Wind
 type alias Player =
     { name : String
     , balloon : Balloon
-    , collected : Int
+    , score : Int
     }
 
 
@@ -87,6 +87,19 @@ availableTreasures =
     [ Gold, Gold, Gold, Silver, Silver, Silver, Bronze, Bronze, Bronze ]
 
 
+treasureValue : Treasure -> Int
+treasureValue treasure =
+    case treasure of
+        Gold ->
+            3
+
+        Silver ->
+            2
+
+        Bronze ->
+            1
+
+
 generateTreasures : List Position -> Treasures
 generateTreasures positions =
     let
@@ -97,20 +110,26 @@ generateTreasures positions =
     Dict.fromList zipped
 
 
-createPlayer : String -> Element.Color -> Player
+createPlayer : String -> Element.Color -> ( String, Player )
 createPlayer name col =
-    { name = name
-    , balloon =
-        { color = col
-        , position =
-            { horizontal = 0
-            , vertical = 0
+    let
+        balloon =
+            { color = col
+            , position =
+                { horizontal = 0
+                , vertical = 0
+                }
+            , height = 0
+            , changedHeight = False
             }
-        , height = 0
-        , changedHeight = False
-        }
-    , collected = 0
-    }
+
+        player =
+            { name = name
+            , balloon = balloon
+            , score = 0
+            }
+    in
+    ( name, player )
 
 
 emptyModel : Model
@@ -118,8 +137,8 @@ emptyModel =
     { windAtHeight = []
     , players =
         Dict.fromList
-            [ ( "player1", createPlayer "player1" Colors.cyan )
-            , ( "player2", createPlayer "player2" Colors.blue )
+            [ createPlayer "player1" Colors.cyan
+            , createPlayer "player2" Colors.blue
             ]
     , treasures = Dict.empty
     }
@@ -256,8 +275,49 @@ changeBalloonHeight balloon change =
 changeHeight : Model -> String -> Int -> Model
 changeHeight model id change =
     let
+        maybeTreasure : Player -> Maybe Treasure
+        maybeTreasure player =
+            Dict.get (toCoordinates player.balloon.position) model.treasures
+
+        takesTreasure : Player -> Maybe Player
+        takesTreasure player =
+            if player.balloon.height == 0 then
+                Just player
+
+            else
+                Nothing
+
+        collected : Player -> Int
+        collected player =
+            takesTreasure player
+                |> Maybe.andThen maybeTreasure
+                |> Maybe.map treasureValue
+                |> Maybe.withDefault 0
+
         changePlayerHeight : Player -> Player
-        changePlayerHeight pl =
-            { pl | balloon = changeBalloonHeight pl.balloon change }
+        changePlayerHeight player =
+            let
+                new =
+                    { player | balloon = changeBalloonHeight player.balloon change }
+            in
+            { new | score = new.score + collected new }
+
+        newPlayers : Dict String Player
+        newPlayers =
+            Dict.update id (Maybe.map changePlayerHeight) model.players
+
+        removeTreasure : Player -> Treasures
+        removeTreasure player =
+            Dict.remove (toCoordinates player.balloon.position) model.treasures
+
+        takeTreasure : Player -> Maybe Treasures
+        takeTreasure player =
+            Maybe.map removeTreasure (takesTreasure player)
+
+        newTreasures : Treasures
+        newTreasures =
+            Dict.get id newPlayers
+                |> Maybe.andThen takeTreasure
+                |> Maybe.withDefault model.treasures
     in
-    { model | players = Dict.update id (Maybe.map changePlayerHeight) model.players }
+    { model | players = newPlayers, treasures = newTreasures }

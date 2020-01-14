@@ -97,12 +97,18 @@ windList : List Model.Wind -> List (Element msg)
 windList windAtHeight =
     windAtHeight
         |> List.reverse
+        |> (::) Model.Calm
         |> List.map (\w -> el [ alignRight ] (text <| displayDirection w))
 
 
+displayInPlayerColor : String -> Model.Player -> Element msg
+displayInPlayerColor str player =
+    Element.el [ Font.color player.balloon.color ] (text str)
+
+
 displayBalloon : Model.Player -> Element msg
-displayBalloon player =
-    Element.el [ Font.color player.balloon.color ] (text "o")
+displayBalloon =
+    displayInPlayerColor "o"
 
 
 balloonHeight : Model.Player -> List (Element msg)
@@ -130,11 +136,21 @@ windsPanel model =
             , spaceEvenly
             ]
 
-        players : List (Element msg)
-        players =
+        playerHeights : List (List (Element msg))
+        playerHeights =
             model.players
                 |> Dict.values
                 |> List.map balloonHeight
+
+        playerScores : List (Element msg)
+        playerScores =
+            model.players
+                |> Dict.values
+                |> List.map (\p -> displayInPlayerColor (String.fromInt p.score) p)
+
+        playerColumns : List (Element msg)
+        playerColumns =
+            List.map2 (\heights scores -> scores :: heights) playerHeights playerScores
                 |> List.map (column windsPanelProperties)
 
         legend : Element msg
@@ -142,7 +158,7 @@ windsPanel model =
             column windsPanelProperties (windList model.windAtHeight)
     in
     row [ height fill, width <| px sidebarWidth ]
-        (List.append players [ legend ])
+        (List.append playerColumns [ legend ])
 
 
 view : Model -> Html Msg
