@@ -110,30 +110,30 @@ generateTreasures positions =
     Dict.fromList zipped
 
 
-createPlayer : String -> Element.Color -> ( String, Player )
-createPlayer name col =
-    let
-        balloon =
-            { color = col
-            , position =
-                { horizontal = 0
-                , vertical = 0
-                }
-            , height = 0
-            , changedHeight = False
-            }
-
-        player =
-            { name = name
-            , balloon = balloon
-            , score = 0
-            }
-    in
-    ( name, player )
-
-
 emptyModel : Model
 emptyModel =
+    let
+        createPlayer : String -> Element.Color -> ( String, Player )
+        createPlayer name col =
+            let
+                balloon =
+                    { color = col
+                    , position =
+                        { horizontal = 0
+                        , vertical = 0
+                        }
+                    , height = 0
+                    , changedHeight = False
+                    }
+
+                player =
+                    { name = name
+                    , balloon = balloon
+                    , score = 0
+                    }
+            in
+            ( name, player )
+    in
     { windAtHeight = []
     , players =
         Dict.fromList
@@ -186,44 +186,51 @@ setBalloonPosition position balloon =
     { balloon | position = position, changedHeight = False }
 
 
-blowPlayer : List Wind -> String -> Player -> Player
-blowPlayer winds id player =
-    let
-        playerWind =
-            windAtHeight winds player.balloon.height
-
-        position =
-            changePosition player.balloon.position playerWind
-    in
-    { player | balloon = setBalloonPosition position player.balloon }
-
-
 blow : Model -> Model
 blow model =
-    { model | players = model.players |> Dict.map (blowPlayer model.windAtHeight) }
-
-
-updatePositionNoWrap : Int -> Int -> Int
-updatePositionNoWrap position move =
     let
-        newPosition =
-            position + move
+        blowPlayer : List Wind -> String -> Player -> Player
+        blowPlayer winds id player =
+            let
+                windAtHeight : Int -> Wind
+                windAtHeight height =
+                    winds
+                        |> List.drop height
+                        |> List.head
+                        |> Maybe.withDefault Calm
+
+                playerWind : Wind
+                playerWind =
+                    windAtHeight player.balloon.height
+
+                position : Position
+                position =
+                    changePosition player.balloon.position playerWind
+            in
+            { player | balloon = setBalloonPosition position player.balloon }
     in
-    if newPosition >= 0 && newPosition < mapSize then
-        newPosition
-
-    else
-        position
-
-
-updatePositionWrap : Int -> Int -> Int
-updatePositionWrap position move =
-    modBy mapSize (position + move)
+    { model | players = model.players |> Dict.map (blowPlayer model.windAtHeight) }
 
 
 changePosition : Position -> Wind -> Position
 changePosition position wind =
     let
+        updatePositionNoWrap : Int -> Int -> Int
+        updatePositionNoWrap pos move =
+            let
+                newPosition =
+                    pos + move
+            in
+            if newPosition >= 0 && newPosition < mapSize then
+                newPosition
+
+            else
+                pos
+
+        updatePositionWrap : Int -> Int -> Int
+        updatePositionWrap pos move =
+            modBy mapSize (pos + move)
+
         updateFunction =
             updatePositionNoWrap
     in
@@ -244,37 +251,28 @@ changePosition position wind =
             position
 
 
-windAtHeight : List Wind -> Int -> Wind
-windAtHeight winds height =
-    winds
-        |> List.drop height
-        |> List.head
-        |> Maybe.withDefault Calm
-
-
-changeBalloonHeight : Balloon -> Int -> Balloon
-changeBalloonHeight balloon change =
-    let
-        newHeight =
-            balloon.height + change
-
-        shouldChangeHeight =
-            balloon.changedHeight == False && newHeight >= 0 && newHeight <= maxHeight
-    in
-    { balloon
-        | height =
-            if shouldChangeHeight then
-                newHeight
-
-            else
-                balloon.height
-        , changedHeight = True
-    }
-
-
 changeHeight : Model -> String -> Int -> Model
 changeHeight model id change =
     let
+        changeBalloonHeight : Balloon -> Balloon
+        changeBalloonHeight balloon =
+            let
+                newHeight =
+                    balloon.height + change
+
+                shouldChangeHeight =
+                    balloon.changedHeight == False && newHeight >= 0 && newHeight <= maxHeight
+            in
+            { balloon
+                | height =
+                    if shouldChangeHeight then
+                        newHeight
+
+                    else
+                        balloon.height
+                , changedHeight = True
+            }
+
         maybeTreasure : Player -> Maybe Treasure
         maybeTreasure player =
             Dict.get (toCoordinates player.balloon.position) model.treasures
@@ -298,7 +296,7 @@ changeHeight model id change =
         changePlayerHeight player =
             let
                 new =
-                    { player | balloon = changeBalloonHeight player.balloon change }
+                    { player | balloon = changeBalloonHeight player.balloon }
             in
             { new | score = new.score + collected new }
 

@@ -24,21 +24,26 @@ type alias Board msg =
     Grid.Grid (Element msg)
 
 
-cell : Element msg -> Element msg
-cell e =
-    row [ height (fillPortion 1), width (fillPortion 1) ]
-        [ Element.el [ centerX, centerY ] e ]
-
-
-showRow : Array.Array (Element msg) -> Element msg
-showRow r =
-    row [ height fill, width fill ]
-        (Array.toList r |> List.map cell)
+view : Model -> Html Msg
+view model =
+    layout [ Font.color base3, Background.color base02 ] <|
+        row [ Background.color base03, height <| px mapSize, width <| px (mapSize + sidebarWidth), centerX, centerY ]
+            [ earthPanel model, windsPanel model ]
 
 
 earthPanel : Model -> Element msg
 earthPanel model =
     let
+        cell : Element msg -> Element msg
+        cell e =
+            row [ height (fillPortion 1), width (fillPortion 1) ]
+                [ Element.el [ centerX, centerY ] e ]
+
+        showRow : Array.Array (Element msg) -> Element msg
+        showRow r =
+            row [ height fill, width fill ]
+                (Array.toList r |> List.map cell)
+
         displayTreasures : Int -> Int -> String -> Element msg
         displayTreasures x y e =
             case model.treasures |> Dict.get ( x, y ) of
@@ -74,60 +79,47 @@ earthPanel model =
         |> column [ height fill, width fill ]
 
 
-displayDirection : Model.Wind -> String
-displayDirection direction =
-    case direction of
-        Model.N _ ->
-            "^"
-
-        Model.S _ ->
-            "v"
-
-        Model.E _ ->
-            ">"
-
-        Model.W _ ->
-            "<"
-
-        Model.Calm ->
-            " "
-
-
-windList : List Model.Wind -> List (Element msg)
-windList windAtHeight =
-    windAtHeight
-        |> List.reverse
-        |> (::) Model.Calm
-        |> List.map (\w -> el [ alignRight ] (text <| displayDirection w))
-
-
-displayInPlayerColor : String -> Model.Player -> Element msg
-displayInPlayerColor str player =
-    Element.el [ Font.color player.balloon.color ] (text str)
-
-
-displayBalloon : Model.Player -> Element msg
-displayBalloon =
-    displayInPlayerColor "o"
-
-
-balloonHeight : Model.Player -> List (Element msg)
-balloonHeight player =
-    List.range 0 Model.maxHeight
-        |> List.reverse
-        |> List.map
-            (\h ->
-                if h == player.balloon.height then
-                    displayBalloon player
-
-                else
-                    text " "
-            )
-
-
 windsPanel : Model -> Element msg
 windsPanel model =
     let
+        displayDirection : Model.Wind -> String
+        displayDirection direction =
+            case direction of
+                Model.N _ ->
+                    "^"
+
+                Model.S _ ->
+                    "v"
+
+                Model.E _ ->
+                    ">"
+
+                Model.W _ ->
+                    "<"
+
+                Model.Calm ->
+                    " "
+
+        windList : List Model.Wind -> List (Element msg)
+        windList windAtHeight =
+            windAtHeight
+                |> List.reverse
+                |> (::) Model.Calm
+                |> List.map (\w -> el [ alignRight ] (text <| displayDirection w))
+
+        balloonHeight : Model.Player -> List (Element msg)
+        balloonHeight player =
+            List.range 0 Model.maxHeight
+                |> List.reverse
+                |> List.map
+                    (\h ->
+                        if h == player.balloon.height then
+                            displayBalloon player
+
+                        else
+                            text " "
+                    )
+
         windsPanelProperties =
             [ height fill
             , width fill
@@ -161,8 +153,11 @@ windsPanel model =
         (List.append playerColumns [ legend ])
 
 
-view : Model -> Html Msg
-view model =
-    layout [ Font.color base3, Background.color base02 ] <|
-        row [ Background.color base03, height <| px mapSize, width <| px (mapSize + sidebarWidth), centerX, centerY ]
-            [ earthPanel model, windsPanel model ]
+displayInPlayerColor : String -> Model.Player -> Element msg
+displayInPlayerColor str player =
+    Element.el [ Font.color player.balloon.color ] (text str)
+
+
+displayBalloon : Model.Player -> Element msg
+displayBalloon =
+    displayInPlayerColor "o"
