@@ -232,7 +232,7 @@ changePosition position wind =
             modBy mapSize (pos + move)
 
         updateFunction =
-            updatePositionNoWrap
+            updatePositionWrap
     in
     case wind of
         N _ ->
